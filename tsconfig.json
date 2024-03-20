@@ -8,7 +8,17 @@
     "strict": true,                                     
     "skipLibCheck": true,
     "outDir": "./dist/server",
-    "rootDir": "./src/server"                                 
+    "rootDir": "./src/server",                                 
+    "paths": {
+      "@interfaces": ["./src/server/interfaces"],
+      "@drivers": ["./src/server/drivers"],
+      "@useCase": ["./src/server/useCase"],
+
+
+    }
+  },
+  "jest": {
+    "tsConfig": "./tsconfig.json"
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "node_modules"]
