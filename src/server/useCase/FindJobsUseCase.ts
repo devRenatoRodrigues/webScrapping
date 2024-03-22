@@ -5,15 +5,13 @@ import { SelectFilterUseCase } from "./selectFilterUseCase";
 import { ILinkedInFindJobsRequest, ILinkedInJobs, } from "../interfaces/linkedin.interfaces";
 import fs from 'fs';
 
-
-
 export class FindJobsUseCase {
 
     constructor(private webBrowser: WebBrowser) { }
 
     async execute(settings: ILinkedInFindJobsRequest): Promise<ILinkedInJobs[]> {
         const jobs: ILinkedInJobs[] = [];
-        const { filterButton, query, quantity = 50 } = settings;
+        const { filterButton, query, quantity = 500 } = settings;
 
         await new SearchUseCase(this.webBrowser).execute(query);
         await new SelectFilterUseCase(this.webBrowser).execute(filterButton);
@@ -27,8 +25,8 @@ export class FindJobsUseCase {
                 this._console('Extracting jobs...');
 
                 // Get Jobs container
-                await this.driver.wait(until.elementsLocated(By.className('scaffold-layout__list-container')), 10000)
-                const ulEl = await this.driver.findElements(By.className('scaffold-layout__list-container'));
+                await this.driver.wait(until.elementsLocated(By.css('ul.scaffold-layout__list-container')), 10000)
+                const ulEl = await this.driver.findElements(By.css('ul.scaffold-layout__list-container'));
                 const liEl = await ulEl[0].findElements(By.css('li.jobs-search-results__list-item'));
                 const footer = await this.driver.findElement(By.css('footer.global-footer-compact'));
 
@@ -44,8 +42,7 @@ export class FindJobsUseCase {
                 if (jobs.length >= quantity) break;
 
                 // Go to next page
-                pageNumberPath = `//button[contains(.,'${nextPage}')]`;
-                pageButtonEl = await this.driver.findElement(By.xpath(pageNumberPath));
+                pageButtonEl = await this.driver.findElement(By.css(`button[aria-label="Page ${pageNumber}"]`));
                 pageButtonEl.click();
 
             } catch (error: any) {
@@ -63,7 +60,7 @@ export class FindJobsUseCase {
         const jobs = [];
         for (const el of liEl) {
             try {
-                const nameLinkElement = await el.findElement(By.className('job-card-list__title'))
+                const nameLinkElement = await el.findElement(By.css('a.job-card-list__title'))
                 const name = (await nameLinkElement.getText()).split('\n')[0];
                 const url = await nameLinkElement.getAttribute('href');
                 const job: ILinkedInJobs = { name, url };
