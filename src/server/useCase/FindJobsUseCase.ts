@@ -3,6 +3,7 @@ import { WebBrowser } from "../drivers";
 import { SearchUseCase } from "./SearchUseCase";
 import { SelectFilterUseCase } from "./selectFilterUseCase";
 import { ILinkedInFindJobsRequest, ILinkedInJobs, } from "../interfaces/linkedin.interfaces";
+import fs from 'fs';
 
 
 
@@ -12,45 +13,43 @@ export class FindJobsUseCase {
 
     async execute(settings: ILinkedInFindJobsRequest): Promise<ILinkedInJobs[]> {
         const jobs: ILinkedInJobs[] = [];
-        const { filterButton, query, quantity = 5 } = settings;
+        const { filterButton, query, quantity = 50 } = settings;
 
         await new SearchUseCase(this.webBrowser).execute(query);
         await new SelectFilterUseCase(this.webBrowser).execute(filterButton);
 
+        let pageNumber = 1;
+        let pageNumberPath;
+        let pageButtonEl;
         while (jobs.length < quantity) {
             try {
+                const nextPage = pageNumber += 1
                 this._console('Extracting jobs...');
 
-                await this.driver.wait(until.elementsLocated(By.className('jobs-search-results-list')), 10000)
-                const content = await this.driver.findElements(By.className('jobs-search-results-list'));
-                const jobsFromPage = await this._extractjobsFromPage(content);
-                this._console(jobsFromPage);
+                // Get Jobs container
+                await this.driver.wait(until.elementsLocated(By.className('scaffold-layout__list-container')), 10000)
+                const ulEl = await this.driver.findElements(By.className('scaffold-layout__list-container'));
+                const liEl = await ulEl[0].findElements(By.css('li.jobs-search-results__list-item'));
+                const footer = await this.driver.findElement(By.css('footer.global-footer-compact'));
+
+                await this._scrollToFooter(liEl, footer);
+
+                const jobsFromPage = await this._extractjobsFromPage(liEl);
                 if (jobsFromPage.length) {
                     jobs.push(...jobsFromPage);
+                    this._console(`Extract total of ${jobsFromPage.length} Jobs in this page`);
+                    this._saveOn(JSON.parse(JSON.stringify(jobs)));
                 }
 
                 if (jobs.length >= quantity) break;
 
-                // Wait
-                await this.driver.sleep(5000);
+                // Go to next page
+                pageNumberPath = `//button[contains(.,'${nextPage}')]`;
+                pageButtonEl = await this.driver.findElement(By.xpath(pageNumberPath));
+                pageButtonEl.click();
 
-                // Next Page
-                this._console('Next page button...');
-                await this.driver.executeScript("window.scrollTo(0, document.body.scrollHeight)");
-                let nextButton = await this.driver.wait(until.elementLocated(By.xpath("//button[contains(., 'Next')]")), 10000);
-                if (!nextButton) { break; }
-                nextButton = await this.driver.findElement(By.xpath("//button[contains(., 'Next')]"));
-                await this.driver.wait(until.elementIsEnabled(nextButton), 5000);
-                await nextButton.click();
-
-                // Wait
-                await this.driver.wait(
-                    until.stalenessOf(content[content.length - 1]),
-                    20000,
-                    'Elements not found within the time limit.'
-                );
             } catch (error: any) {
-                console.error('LinkedIn Driver _extractjobs(): ' + error.message)
+                console.error('Error: ' + error.message)
                 break;
             }
         }
@@ -59,12 +58,11 @@ export class FindJobsUseCase {
         return jobs;
     }
 
-    private async _extractjobsFromPage(content: WebElement[]) {
+    private async _extractjobsFromPage(liEl: WebElement[]) {
         this._console('Extracting jobs from page...');
         const jobs = [];
-        for (const el of content) {
+        for (const el of liEl) {
             try {
-                this._console(content.length);
                 const nameLinkElement = await el.findElement(By.className('job-card-list__title'))
                 const name = (await nameLinkElement.getText()).split('\n')[0];
                 const url = await nameLinkElement.getAttribute('href');
@@ -72,8 +70,23 @@ export class FindJobsUseCase {
                 jobs.push(job)
             } catch (error) { /* empty */ }
         }
-        this._console(jobs);
         return jobs;
+    }
+
+    private async _scrollToFooter(elements: WebElement[], footer: WebElement) {
+        this._console('Scrolling Down...')
+        for (let i = 0; i < elements.length; i += 3) {
+            await this.driver.executeScript("arguments[0].scrollIntoView();", elements[i]);
+            await this.driver.sleep(3000);
+        }
+        await this.driver.executeScript("arguments[0].scrollIntoView();", footer);
+    }
+
+    private _saveOn(jobs: ILinkedInJobs[]) {
+        const data = JSON.stringify(jobs, null, 2);
+        const path = 'temp/jobs.json';
+        fs.writeFileSync(path, data, { encoding: 'utf8' });
+        this._console('Jobs saved on temp/jobs.json');
     }
 
     private _console(message: any) {
