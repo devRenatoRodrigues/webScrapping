@@ -3,7 +3,6 @@ import { WebBrowser } from "../drivers";
 import { SearchUseCase } from "./SearchUseCase";
 import { SelectFilterUseCase } from "./selectFilterUseCase";
 import { ILinkedInFindJobsRequest, ILinkedInJobs, } from "../interfaces/linkedin.interfaces";
-import fs from 'fs';
 
 export class FindJobsUseCase {
 
@@ -11,7 +10,7 @@ export class FindJobsUseCase {
 
     async execute(settings: ILinkedInFindJobsRequest): Promise<ILinkedInJobs[]> {
         const jobs: ILinkedInJobs[] = [];
-        const { filterButton, query, quantity = 500 } = settings;
+        const { filterButton, query, quantity = 50 } = settings;
 
         await new SearchUseCase(this.webBrowser).execute(query);
         await new SelectFilterUseCase(this.webBrowser).execute(filterButton);
@@ -36,7 +35,7 @@ export class FindJobsUseCase {
                 if (jobsFromPage.length) {
                     jobs.push(...jobsFromPage);
                     this._console(`Extract total of ${jobsFromPage.length} Jobs in this page`);
-                    this._saveOn(JSON.parse(JSON.stringify(jobs)));
+                    // this._saveOn(JSON.parse(JSON.stringify(jobs)));
                 }
 
                 if (jobs.length >= quantity) break;
@@ -79,12 +78,12 @@ export class FindJobsUseCase {
         await this.driver.executeScript("arguments[0].scrollIntoView();", footer);
     }
 
-    private _saveOn(jobs: ILinkedInJobs[]) {
-        const data = JSON.stringify(jobs, null, 2);
-        const path = 'temp/jobs.json';
-        fs.writeFileSync(path, data, { encoding: 'utf8' });
-        this._console('Jobs saved on temp/jobs.json');
-    }
+    // private _saveOn(jobs: ILinkedInJobs[]) {
+    //     const data = JSON.stringify(jobs, null, 2);
+    //     const path = 'temp/jobs.json';
+    //     fs.writeFileSync(path, data, { encoding: 'utf8' });
+    //     this._console('Jobs saved on temp/jobs.json');
+    // }
 
     private _console(message: any) {
         if (process.env.DEBUG === 'true') {
