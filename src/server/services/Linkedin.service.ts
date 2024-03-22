@@ -4,6 +4,7 @@ import { LoginUseCase, StartUseCase } from '../useCase';
 import dotenv from 'dotenv';
 import { SelectFilterUseCase } from "../useCase/selectFilterUseCase";
 import { FindJobsUseCase } from "../useCase/FindJobsUseCase";
+import SaveOnUseCase from "../useCase/SaveOnUseCase";
 dotenv.config();
 
 export default class LinkedInService {
@@ -17,8 +18,8 @@ export default class LinkedInService {
             password: process.env.LINKEDIN_PASSWORD!
         }
         const isAuthenticaded = await login.execute(auth);
-        const selectFilter = new SelectFilterUseCase(driver);
-        await new FindJobsUseCase(driver).execute({ query: 'Software Engineer', filterButton: 'Jobs' });
+        const extractJobs = await new FindJobsUseCase(driver).execute({ query: 'Software Engineer', filterButton: 'Jobs' });
+        new SaveOnUseCase().execute({ data: extractJobs })
         return isAuthenticaded;
     }
 
