@@ -29,7 +29,7 @@ export class LoginUseCase {
         const loginUrl = 'https://www.linkedin.com/login?_l=en';
         await this.driver.get(loginUrl);
         let getCurrentUrl = await this.driver.getCurrentUrl()
-        this._console('getCurrentUrl: ' + getCurrentUrl);
+        this._console(`getCurrentUrl: ${getCurrentUrl}`);
         if (getCurrentUrl.includes('feed')) {
             this._console('Already logged in...');
             return true;
@@ -45,7 +45,7 @@ export class LoginUseCase {
             throw new Error('No user input found');
         }
         await userInput.sendKeys(auth.user);
-        this._console('[Login] User set...');
+        this._console('User set...');
 
         // Password input
         const passwordInput = await this.driver.findElement(By.id('password'));
@@ -53,7 +53,7 @@ export class LoginUseCase {
         if (!passwordInput) {
             throw new Error('No password input found');
         }
-        this._console('[Login] Password set...');
+        this._console('Password set...');
 
         // Wait for login
         await this.driver.sleep(5000);
@@ -61,8 +61,6 @@ export class LoginUseCase {
 
     private async _checkIfLogged() {
         const getCurrentUrl = await this.driver.getCurrentUrl();
-        this._console('getCurrentUrl: ' + getCurrentUrl);
-
         if (getCurrentUrl.includes('feed')) {
             return true;
         } else if (getCurrentUrl.includes('https://www.linkedin.com/login')) {

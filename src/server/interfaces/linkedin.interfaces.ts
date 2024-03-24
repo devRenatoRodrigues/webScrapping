@@ -6,6 +6,7 @@ export interface ILinkedInAuth {
 
 
 export interface ILinkedInFindJobsRequest {
+  auth: ILinkedInAuth;
   query: string;
   quantity?: number;
   filterButton: LinkedInFilterButton;

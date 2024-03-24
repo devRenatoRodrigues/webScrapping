@@ -7,10 +7,10 @@ dotenv.config();
 describe('LinkedIn Test', () => {
     jest.setTimeout(300000)
 
-    const auth: ILinkedInAuth = {
-        user: process.env.LINKEDIN_USERNAME!,
-        password: process.env.LINKEDIN_PASSWORD!
-    }
+    // const auth: ILinkedInAuth = {
+    //     user: process.env.LINKEDIN_USERNAME!,
+    //     password: process.env.LINKEDIN_PASSWORD!
+    // }
     const linkedInService = new LinkedInService();
 
     // beforeAll(async () => {
@@ -18,7 +18,7 @@ describe('LinkedIn Test', () => {
     // });
 
     it('should login', async () => {
-        const isAuthenticaded = await linkedInService.execute();
+        const isAuthenticaded = await linkedInService.findJobs();
         console.log('isAuthenticaded', isAuthenticaded);
         expect(isAuthenticaded).toBe(true);
     })

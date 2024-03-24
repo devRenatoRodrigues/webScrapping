@@ -3,6 +3,7 @@ import { WebBrowser } from "../drivers";
 import { SearchUseCase } from "./SearchUseCase";
 import { SelectFilterUseCase } from "./selectFilterUseCase";
 import { ILinkedInFindJobsRequest, ILinkedInJobs, } from "../interfaces/linkedin.interfaces";
+import { LoginUseCase } from "./LoginUseCase";
 
 export class FindJobsUseCase {
 
@@ -10,8 +11,9 @@ export class FindJobsUseCase {
 
     async execute(settings: ILinkedInFindJobsRequest): Promise<ILinkedInJobs[]> {
         const jobs: ILinkedInJobs[] = [];
-        const { filterButton, query, quantity = 50 } = settings;
+        const { auth, filterButton, query, quantity = 50 } = settings;
 
+        await new LoginUseCase(this.webBrowser).execute(auth);
         await new SearchUseCase(this.webBrowser).execute(query);
         await new SelectFilterUseCase(this.webBrowser).execute(filterButton);
 
@@ -77,13 +79,6 @@ export class FindJobsUseCase {
         }
         await this.driver.executeScript("arguments[0].scrollIntoView();", footer);
     }
-
-    // private _saveOn(jobs: ILinkedInJobs[]) {
-    //     const data = JSON.stringify(jobs, null, 2);
-    //     const path = 'temp/jobs.json';
-    //     fs.writeFileSync(path, data, { encoding: 'utf8' });
-    //     this._console('Jobs saved on temp/jobs.json');
-    // }
 
     private _console(message: any) {
         if (process.env.DEBUG === 'true') {

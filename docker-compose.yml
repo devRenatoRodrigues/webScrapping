@@ -1,0 +1,38 @@
+version: '3'
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      POSTGRES_DATABASE: MyDatabase
+      POSTGRES_USER: MyUser
+      POSTGRES_PASSWORD: MyPassword
+
+  backend:
+    image: node:14
+    restart: always
+    volumes:
+      - ./src/server:/app
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: MyDatabase
+      DB_USER: MyUser
+      DB_PASSWORD: MyPassword
+      
+
+  # frontend:
+  #   image: your_frontend_image
+  #   restart: always
+  #   volumes:
+  #     - ./src/app:/app
+  #   ports:
+  #     - 3001:3001
+  #   depends_on:
+  #     - backend
