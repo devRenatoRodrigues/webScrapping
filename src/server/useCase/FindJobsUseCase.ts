@@ -58,14 +58,15 @@ export class FindJobsUseCase {
 
     private async _extractjobsFromPage(liEl: WebElement[]) {
         this._console('Extracting jobs from page...');
-        const jobs = [];
+        const jobs: ILinkedInJobs[] = [];
         for (const el of liEl) {
             try {
                 const nameLinkElement = await el.findElement(By.css('a.job-card-list__title'))
-                const name = (await nameLinkElement.getText()).split('\n')[0];
+                const job = (await nameLinkElement.getText()).split('\n')[0];
                 const url = await nameLinkElement.getAttribute('href');
-                const job: ILinkedInJobs = { name, url };
-                jobs.push(job)
+                const createdAt = new Date();
+                const currentJob: ILinkedInJobs = { createdAt, job, url };
+                jobs.push(currentJob)
             } catch (error) { /* empty */ }
         }
         return jobs;

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "target": "es2016",                                  
+    "module": "commonjs",                                
+    "esModuleInterop": true,                            
+    "forceConsistentCasingInFileNames": true,            
+    "strict": true,                                     
+    "skipLibCheck": true,
+    "outDir": "./dist/server",
+    "rootDir": "./",                                 
+  },
+  "jest": {
+    "tsConfig": "./tsconfig.json"
+  },
+  "include": ["*"],
+  "exclude": ["dist", "node_modules"]
+}

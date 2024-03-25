@@ -13,6 +13,7 @@ export interface ILinkedInFindJobsRequest {
 }
 
 export interface ILinkedInJobs {
-  name: string;
+  createdAt: Date;
+  job: string;
   url: string;
 }

@@ -1,10 +1,9 @@
 import { Router } from 'express';
+import JobsRoute from './Jobs.route';
 
 const router = Router();
 
-router.get('/', (req, res) => {
-    res.send('Hello World');
-});
+router.use('/jobs', JobsRoute);
 
 
 

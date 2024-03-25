@@ -1,4 +1,4 @@
-import { IWebBrowser, IWebBrowserOptions } from '@interfaces';
+import { IWebBrowser, IWebBrowserOptions } from '../interfaces';
 import * as chromedriver from 'chromedriver';
 import { ProxyPlugin } from 'selenium-chrome-proxy-plugin';
 import { Browser, Builder, WebDriver } from 'selenium-webdriver';
@@ -26,7 +26,6 @@ export class WebBrowser implements IWebBrowser {
             chromeOptions.addArguments('--window-size=1366,768');
             const profileDirectory = '/tmp/chrome-profile';
             chromeOptions.addArguments('--user-data-dir=' + profileDirectory);
-
             const prefs = {
                 'profile.default_content_setting_values.media_stream_camera': 1,
                 'profile.default_content_setting_values.media_stream_mic': 1,

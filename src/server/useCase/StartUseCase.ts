@@ -5,7 +5,7 @@ export class StartUseCase {
 
   async execute(browser: BrowserType) {
     const webBrowser = new WebBrowser();
-    await webBrowser.start({ browser, headless: false })
+    await webBrowser.start({ browser, headless: true })
     return webBrowser;
   }
 
