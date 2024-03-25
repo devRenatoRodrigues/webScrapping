@@ -4,28 +4,44 @@ services:
     image: postgres:alpine
     restart: always
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
       POSTGRES_DATABASE: MyDatabase
       POSTGRES_USER: MyUser
       POSTGRES_PASSWORD: MyPassword
+    networks:
+      - my-network
 
   backend:
-    image: node:14
+    build: ./src/server
     restart: always
     volumes:
-      - ./src/server:/app
+      - ./src/server:/app/server
+      - ./dist:/app/dist
     ports:
       - 3000:3000
     depends_on:
       - db
     environment:
       DB_HOST: db
-      DB_PORT: 3306
+      DB_PORT: 5432
       DB_NAME: MyDatabase
       DB_USER: MyUser
       DB_PASSWORD: MyPassword
-      
+    networks:
+      - my-network
+
+  # chrome:
+  #     image: selenium/standalone-chrome:latest
+  #     hostname: chrome
+  #     networks:
+  #       - my-network
+  #     privileged: true
+  #     shm_size: 2g
+
+networks:
+  my-network:
+    driver: bridge
 
   # frontend:
   #   image: your_frontend_image
