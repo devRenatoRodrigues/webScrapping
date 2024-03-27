@@ -2,10 +2,10 @@ import { IWebBrowser, IWebBrowserOptions } from '../interfaces';
 import * as chromedriver from 'chromedriver';
 import { ProxyPlugin } from 'selenium-chrome-proxy-plugin';
 import { Browser, Builder, WebDriver } from 'selenium-webdriver';
-import { Options } from 'selenium-webdriver/chrome';
+import { Options, ServiceBuilder } from 'selenium-webdriver/chrome';
 
 export class WebBrowser implements IWebBrowser {
-    options: IWebBrowserOptions = { proxy: false, browser: 'chrome', headless: true }
+    options: IWebBrowserOptions = { proxy: false, browser: 'chrome' }
     driver!: WebDriver
     timeoutMS = 60000;
 
@@ -22,8 +22,14 @@ export class WebBrowser implements IWebBrowser {
             chromedriver.path; // Force chromedriver to be downloaded
 
             let chromeOptions = new Options();
-            if (this.options.headless) chromeOptions.addArguments('--headless=new');
+            // if (this.options.headless) chromeOptions.addArguments('--headless=new');
+            chromeOptions.addArguments('--headless=new')
             chromeOptions.addArguments('--window-size=1366,768');
+            chromeOptions.addArguments('--disable-dev-shm-usage');
+            chromeOptions.addArguments('--no-sandbox');
+            chromeOptions.addArguments('--verbose');
+            chromeOptions.setChromeBinaryPath('/usr/bin/google-chrome');
+
             const profileDirectory = '/tmp/chrome-profile';
             chromeOptions.addArguments('--user-data-dir=' + profileDirectory);
             const prefs = {
@@ -50,9 +56,13 @@ export class WebBrowser implements IWebBrowser {
                 })
             }
 
+            let serviceBuilder = new ServiceBuilder('/usr/bin/chromedriver');
+
+
             this.driver = await new Builder()
                 .forBrowser(Browser.CHROME)
                 .setChromeOptions(chromeOptions)
+                .setChromeService(serviceBuilder)
                 .build();
             console.log('Driver started...');
         } catch (error: any) {

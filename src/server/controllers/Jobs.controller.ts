@@ -15,9 +15,10 @@ export class JobsController {
         try {
             const getJobs = await this.linkedinService.findJobs();
             const jobs = await this.jobsService.createManyJobs(getJobs);
-            res.status(200).json(getJobs);
+            res.json(jobs);
         } catch (error) {
-            res.status(500).json({ error: 'Internal server error' });
+            console.error(error);
+            res.status(500).send('An error occurred while getting jobs.');
         }
     }
 
